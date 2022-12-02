@@ -167,7 +167,6 @@ module.exports = function (app) {
             res.send({ result: 'successfully deleted', '_id': req.body._id })
           }
         })
-        })
       }
     });
 };
