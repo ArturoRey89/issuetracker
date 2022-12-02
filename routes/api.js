@@ -25,7 +25,7 @@ const issueSchema = new mongoose.Schema({
 const Issue = mongoose.model("Issue", issueSchema);
 const ObjectId = mongoose.Types.ObjectId;
 
-// FUNCTIONS
+//############ FUNCTIONS ####################
 const findProjectByName = (projectName, done) => {
   Issue.find({project_name: projectName}, 
              {project_name: 0, __v: 0}, 
@@ -55,41 +55,35 @@ const addNewIssue = (issue, done) => {
   }
 }
 const deleteOneIssue = (projectName, issueId, done) => {
-  Issue.deleteOne({"_id": ObjectId(issueId), "project_name": projectName}, (err, res) => {
-    if(err) console.log("err:", err)
-
-    if(res.length > 0){
-      console.log("Found issue to delete :", res)
-      done(null,res)
+  Issue.deleteOne(
+    {"_id": ObjectId(issueId), 
+    "project_name": projectName}, 
+    (err, res) => {
+      if (err) console.log("err:", err, "res:", res)
+      done(err, res)
     }
-    else{
-      console.log("could not find issue by ID")
-      done({error: "could not find issue by ID"},res)
-    }
-  })
+  )
 }
 const updateIssueById = (projectName, issueId, newValues, done) => {
-  Issue.update({"_id": ObjectId(issueId), "project_name": projectName}, newValues, (err, res) => { 
-    if(res.length > 0 && !err){
-      done(null,res)
-    }
-    else{
-      console.log("could not find issue by ID")
+  Issue.updateOne(
+    {"_id": ObjectId(issueId), "project_name": projectName}, 
+    {updated_on: new Date() , ...newValues}, 
+    (err, res) => { 
+      if(err) console.log("updateIssueById err: ", err)
       done(err,res)
     }
-  })
+  )
 }
 
-//API ROUTE CRUD
+//########### API REQUESTS ###############
 module.exports = function (app) {
-
   app.route('/api/issues/:project')
-  
+    //########  GET  ########
     .get(function (req, res){
-      let projectName = req.params.project;
-      
+
     })
     
+    //########  POST  ########
     .post(function (req, res){
       //NOT all required fields provided
       if (!req.body.issue_title 
@@ -125,6 +119,7 @@ module.exports = function (app) {
       }
     })
     
+    //########  PUT  ########
     .put(function (req, res){
       let input_array = Object.entries(req.body)
                         .filter( (val,key) => {
@@ -133,23 +128,29 @@ module.exports = function (app) {
       if(!req.body._id){
         res.send({ error: 'missing _id' })
       }
-      else if ( input_array.length < 1 ) {
+      else if ( input_array.length < 2 ) {
         res.send({ error: 'no update field(s) sent', '_id': req.body._id })
       }
       else {
-        updateIssueById( req.body._id, req.body._id, Object.fromEntries(input_array), (err, updatedIssue) => {
-          if(err){
-            console.log(err)
-            res.send({ error: 'could not update', '_id': req.body._id })
-          }
-          else {
-            res.send({ result: 'successfully updated', '_id': req.body._id })
-          }
-        })
+        updateIssueById(req.params.project, req.body._id, Object.fromEntries(input_array), (err, updateInfo) => {
+            if(err) {
+              console.log(err)
+              res.send({ error: 'could not update', '_id': req.body._id })
+            }
+            else if(!updateInfo.matchedCount) {
+              console.log(updateInfo)
+              res.send({ error: 'could not update', '_id': req.body._id })
+            }
+            else {
+              console.log(updateInfo)
+              res.send({ result: 'successfully updated', '_id': req.body._id })
+            }
+          })
       }
     })
     
-    .delete(function (req, res){
+    //########  DELETE  ########
+    .delete(function (req, res, next){
       if( !req.body._id ) {
         res.send({ error: 'missing _id' })
       } 
@@ -162,8 +163,9 @@ module.exports = function (app) {
           else {
             res.send({ result: 'successfully deleted', '_id': req.body._id })
           }
+          
         })
       }
     });
-    
 };
+
