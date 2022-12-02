@@ -91,21 +91,36 @@ module.exports = function (app) {
     })
     
     .post(function (req, res){
-      let projectName = req.params.project;
-      
       //NOT all required fields provided
       if (!req.body.issue_title 
         || !req.body.issue_text 
         || !req.body.created_by) {
         
         res.status(500).send({error: 'required field(s) missing'})
-        throw new Error('required field(s) missing')
+      }
+      else if (!req.params.project){
+        res.status(500).send({error: 'required "project name" missing'})
       }
       else {
-        let issue = new Issue(req.body);
-        findProjectAndAddIssue(projectName, issue, (err, project) => {
-          if(err) console.log(err);
-          res.send(issue)
+        let issue = new Issue({project_name: req.params.project,
+                               ...req.body});
+        addNewIssue(issue, (err, newIssue) => {
+          if(err) {
+            console.log("POST error addNewIssue: ", err)
+            res.send(err)
+          }
+          else {
+            res.send({assigned_to: newIssue.assigned_to,
+                      status_text: newIssue.status_text,
+                      open: newIssue.open,
+                      _id: newIssue._id,
+                      issue_title: newIssue.issue_title,
+                      issue_text: newIssue.issue_text,
+                      created_by: newIssue.created_by,
+                      created_on: newIssue.created_on,
+                      updated_on: newIssue.updated_on}
+                    )
+          }
         })
       }
     })
