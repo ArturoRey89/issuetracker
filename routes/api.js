@@ -126,8 +126,27 @@ module.exports = function (app) {
     })
     
     .put(function (req, res){
-      let projectName = req.params.project;
-      
+      let input_array = Object.entries(req.body)
+                        .filter( (val,key) => {
+                          return ( (typeof val[1] == "boolean") || val[1] )
+                        });
+      if(!req.body._id){
+        res.send({ error: 'missing _id' })
+      }
+      else if ( input_array.length < 1 ) {
+        res.send({ error: 'no update field(s) sent', '_id': req.body._id })
+      }
+      else {
+        updateIssueById( req.body._id, req.body._id, Object.fromEntries(input_array), (err, updatedIssue) => {
+          if(err){
+            console.log(err)
+            res.send({ error: 'could not update', '_id': req.body._id })
+          }
+          else {
+            res.send({ result: 'successfully updated', '_id': req.body._id })
+          }
+        })
+      }
     })
     
     .delete(function (req, res){
