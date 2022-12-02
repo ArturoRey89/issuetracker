@@ -142,7 +142,6 @@ module.exports = function (app) {
               res.send({ error: 'could not update', '_id': req.body._id })
             }
             else {
-              console.log(updateInfo)
               res.send({ result: 'successfully updated', '_id': req.body._id })
             }
           })
@@ -155,15 +154,19 @@ module.exports = function (app) {
         res.send({ error: 'missing _id' })
       } 
       else {
-        deleteOneIssue(req.params.project, req.body._id, (err, issue) => {
+        deleteOneIssue(req.params.project, req.body._id, (err, deleteInfo) => {
           if(err) {
             console.log(err)
+            res.send({ error: 'could not delete', '_id': req.body._id  })
+          }
+          else if (!deleteInfo.deletedCount) {
+            console.log(deleteInfo)
             res.send({ error: 'could not delete', '_id': req.body._id  })
           }
           else {
             res.send({ result: 'successfully deleted', '_id': req.body._id })
           }
-          
+        })
         })
       }
     });
