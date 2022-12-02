@@ -131,8 +131,20 @@ module.exports = function (app) {
     })
     
     .delete(function (req, res){
-      let projectName = req.params.project;
-      
+      if( !req.body._id ) {
+        res.send({ error: 'missing _id' })
+      } 
+      else {
+        deleteOneIssue(req.params.project, req.body._id, (err, issue) => {
+          if(err) {
+            console.log(err)
+            res.send({ error: 'could not delete', '_id': req.body._id  })
+          }
+          else {
+            res.send({ result: 'successfully deleted', '_id': req.body._id })
+          }
+        })
+      }
     });
     
 };
