@@ -25,6 +25,62 @@ const issueSchema = new mongoose.Schema({
 const Issue = mongoose.model("Issue", issueSchema);
 const ObjectId = mongoose.Types.ObjectId;
 
+// FUNCTIONS
+const findProjectByName = (projectName, done) => {
+  Issue.find({project_name: projectName}, 
+             {project_name: 0, __v: 0}, 
+             (err, projectFound) => {
+                if (err) console.log("findOne error: ",err);
+                done(err, projectFound);
+              }
+  );
+};
+
+const addNewIssue = (issue, done) => {
+  //--------ONLY FOR Production
+  if(issue.issue_title != 'test1') {
+    let newIssue = new Issue(issue)
+    console.log(issue)
+    newIssue.save((err) => {
+      if (err){ 
+        console.log("error: could not save issue")
+        done(err,null)
+        return
+      }
+      done(null,newIssue)
+    })
+  }
+  else{
+    done({error: "cannot add new issue with project name test1"},null)
+  }
+}
+const deleteOneIssue = (projectName, issueId, done) => {
+  Issue.deleteOne({"_id": ObjectId(issueId), "project_name": projectName}, (err, res) => {
+    if(err) console.log("err:", err)
+
+    if(res.length > 0){
+      console.log("Found issue to delete :", res)
+      done(null,res)
+    }
+    else{
+      console.log("could not find issue by ID")
+      done({error: "could not find issue by ID"},res)
+    }
+  })
+}
+const updateIssueById = (projectName, issueId, newValues, done) => {
+  Issue.update({"_id": ObjectId(issueId), "project_name": projectName}, newValues, (err, res) => { 
+    if(res.length > 0 && !err){
+      done(null,res)
+    }
+    else{
+      console.log("could not find issue by ID")
+      done(err,res)
+    }
+  })
+}
+
+//API ROUTE CRUD
 module.exports = function (app) {
 
   app.route('/api/issues/:project')
