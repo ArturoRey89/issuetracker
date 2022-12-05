@@ -34,15 +34,9 @@ const findProjectByName = (projectName, filter, done) => {
     { project_name: projectName, ...filter },
     { project_name: 0, __v: 0 },
     (err, projectFound) => {
-      if (err)
-      done(err, null);
-      
-        return console.log(
-          "findOne error, projectName: ",
-          projectName,
-          "filter",
-          filter
-        );
+      if (err) {
+        console.log("findOne error, projectName: ",projectName,"filter", filter);
+      }
       done(err, projectFound);
     }
   );
@@ -64,7 +58,9 @@ const deleteOneIssue = (projectName, issueId, done) => {
     Issue.findOneAndDelete(
       { _id: ObjectId(issueId), project_name: projectName },
       (err, res) => {
-        if (err) console.log("deleteOne error with _id:", issueId, "res:", res);
+        if (err) {
+          console.log("deleteOne error with _id:", issueId, "res:", res)
+        };
         done(err, res);
       }
     );
@@ -78,15 +74,12 @@ const updateIssueById = (projectName, issueId, newValues, done) => {
     Issue.findOneAndUpdate(
       { _id: ObjectId(issueId), project_name: projectName },
       { updated_on: new Date(), ...newValues },
-      (err, res) => {
+      (err, updated) => {
         if (err)
-          console.log(
-            "updateOne error with _id: ",
-            issueId,
-            " and projectName: ",
-            projectName
-          );
-        done(err, res);
+        {
+          console.log("updateOne error with _id: ",issueId," and projectName: ", projectName );
+        }
+        done(err, updated);
       }
     );
   } catch (e) {
@@ -105,7 +98,7 @@ module.exports = function (app) {
         if (err) {
           res.send({ error: "COULD NOT FIND PROJECT" });
         } else if (project.length > 0) {
-          res.json(project);
+          res.send(project);
         } else {
           res.send({ error: "COULD NOT FIND PROJECT" });
         }
@@ -166,7 +159,7 @@ module.exports = function (app) {
             if (err) {
               res.send({ error: "could not update", _id: req.body._id });
             } else if (updatedIssue) {
-              res.send({ result: "successfully updated", _id: req.body._id });
+              res.send({ result: "successfully updated", _id: updatedIssue._id });
             } else {
               res.send({ error: "could not update", _id: req.body._id });
             }
