@@ -120,9 +120,9 @@ module.exports = function (app) {
         !req.body.issue_text ||
         !req.body.created_by
       ) {
-        res.status(500).send({ error: "required field(s) missing" });
+        res.send({ error: "required field(s) missing" });
       } else if (!req.params.project) {
-        res.status(500).send({ error: 'required "project name" missing' });
+        res.send({ error: 'required "project name" missing' });
       } else {
         let issue = new Issue({
           project_name: req.params.project,

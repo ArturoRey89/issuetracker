@@ -230,7 +230,7 @@ suite('Functional Tests', function() {
           assert.equal(res.status, 200);
           assert.notExists(res.body.result);
           assert.equal(res.body.error, 'missing _id');
-          done()
+          done();
         });
     })
   });
