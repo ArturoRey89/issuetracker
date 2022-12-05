@@ -35,7 +35,12 @@ const findProjectByName = (projectName, filter, done) => {
     { project_name: 0, __v: 0 },
     (err, projectFound) => {
       if (err) {
-        console.log("findOne error, projectName: ",projectName,"filter", filter);
+        console.log(
+          "findOne error, projectName: ",
+          projectName,
+          "filter",
+          filter
+        );
       }
       done(err, projectFound);
     }
@@ -49,7 +54,17 @@ const addNewIssue = (issue, done) => {
       done(err, null);
       return;
     }
-    done(null, newIssue);
+    done(null, {
+      assigned_to: newIssue.assigned_to,
+      status_text: newIssue.status_text,
+      open: newIssue.open,
+      _id: newIssue._id,
+      issue_title: newIssue.issue_title,
+      issue_text: newIssue.issue_text,
+      created_by: newIssue.created_by,
+      created_on: newIssue.created_on,
+      updated_on: newIssue.updated_on,
+    });
   });
 };
 
@@ -59,8 +74,8 @@ const deleteOneIssue = (projectName, issueId, done) => {
       { _id: ObjectId(issueId), project_name: projectName },
       (err, res) => {
         if (err) {
-          console.log("deleteOne error with _id:", issueId, "res:", res)
-        };
+          console.log("deleteOne error with _id:", issueId, "res:", res);
+        }
         done(err, res);
       }
     );
@@ -75,9 +90,13 @@ const updateIssueById = (projectName, issueId, newValues, done) => {
       { _id: ObjectId(issueId), project_name: projectName },
       { updated_on: new Date(), ...newValues },
       (err, updated) => {
-        if (err)
-        {
-          console.log("updateOne error with _id: ",issueId," and projectName: ", projectName );
+        if (err) {
+          console.log(
+            "updateOne error with _id: ",
+            issueId,
+            " and projectName: ",
+            projectName
+          );
         }
         done(err, updated);
       }
@@ -96,11 +115,11 @@ module.exports = function (app) {
     .get(function (req, res) {
       findProjectByName(req.params.project, req.query, (err, project) => {
         if (err) {
-          res.send({ error: "COULD NOT FIND PROJECT" });
+          res.json({ error: "COULD NOT FIND PROJECT" });
         } else if (project.length > 0) {
-          res.send(project);
+          res.json(project);
         } else {
-          res.send({ error: "COULD NOT FIND PROJECT" });
+          res.json({ error: "COULD NOT FIND PROJECT" });
         }
       });
     })
@@ -113,9 +132,9 @@ module.exports = function (app) {
         !req.body.issue_text ||
         !req.body.created_by
       ) {
-        res.send({ error: "required field(s) missing" });
+        res.json({ error: "required field(s) missing" });
       } else if (!req.params.project) {
-        res.send({ error: 'required "project name" missing' });
+        res.json({ error: 'required "project name" missing' });
       } else {
         let issue = new Issue({
           project_name: req.params.project,
@@ -125,17 +144,7 @@ module.exports = function (app) {
           if (err) {
             res.send({ error: "POST error on addNewIssue" });
           } else {
-            res.send({
-              assigned_to: newIssue.assigned_to,
-              status_text: newIssue.status_text,
-              open: newIssue.open,
-              _id: newIssue._id,
-              issue_title: newIssue.issue_title,
-              issue_text: newIssue.issue_text,
-              created_by: newIssue.created_by,
-              created_on: newIssue.created_on,
-              updated_on: newIssue.updated_on,
-            });
+            res.json(newIssue);
           }
         });
       }
@@ -147,9 +156,9 @@ module.exports = function (app) {
         return typeof val[1] == "boolean" || val[1];
       });
       if (!req.body._id) {
-        res.send({ error: "missing _id" });
+        res.json({ error: "missing _id" });
       } else if (input_array.length < 2) {
-        res.send({ error: "no update field(s) sent", _id: req.body._id });
+        res.json({ error: "no update field(s) sent", _id: req.body._id });
       } else {
         updateIssueById(
           req.params.project,
@@ -157,11 +166,14 @@ module.exports = function (app) {
           Object.fromEntries(input_array),
           (err, updatedIssue) => {
             if (err) {
-              res.send({ error: "could not update", _id: req.body._id });
+              res.json({ error: "could not update", _id: req.body._id });
             } else if (updatedIssue) {
-              res.send({ result: "successfully updated", _id: updatedIssue._id });
+              res.json({
+                result: "successfully updated",
+                _id: updatedIssue._id,
+              });
             } else {
-              res.send({ error: "could not update", _id: req.body._id });
+              res.json({ error: "could not update", _id: req.body._id });
             }
           }
         );
@@ -171,18 +183,18 @@ module.exports = function (app) {
     //########  DELETE  ########
     .delete(function (req, res) {
       if (!req.body._id) {
-        res.send({ error: "missing _id" });
+        res.json({ error: "missing _id" });
       } else {
         deleteOneIssue(
           req.params.project,
           req.body._id,
           (err, deletedIssue) => {
             if (err) {
-              res.send({ error: "could not delete", _id: req.body._id });
+              res.json({ error: "could not delete", _id: req.body._id });
             } else if (deletedIssue) {
-              res.send({ result: "successfully deleted", _id: req.body._id });
+              res.json({ result: "successfully deleted", _id: req.body._id });
             } else {
-              res.send({ error: "could not delete", _id: req.body._id });
+              res.json({ error: "could not delete", _id: req.body._id });
             }
           }
         );
