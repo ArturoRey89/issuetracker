@@ -18,17 +18,15 @@ suite('Functional Tests', function() {
               assigned_to: "test4",
               status_text: "test5"})
         .end((err, res) => {
+          assert.equal(res.status, 200);
           assert.strictEqual(res.body.issue_title, "test1");
-          assert.strictEqual(res.body.issue_text, "test2")
-          assert.strictEqual(res.body.created_by, "test3")
-          assert.approximately(new Date(res.body.created_on).getTime(), new Date().getTime(), date_tol)
-          assert.approximately(new Date(res.body.updated_on).getTime(), new Date().getTime(), date_tol)
-          assert.isNotEmpty(res.body.assigned_to, "Should not be empty")
-          assert.strictEqual(res.body.assigned_to, "test4")
-          assert.isNotEmpty(res.body.status_text, "Should not be empty")
-          assert.strictEqual(res.body.status_text, "test5")
-          assert.notEqual(res.status, 500);
-          done()
+          assert.strictEqual(res.body.issue_text, "test2");
+          assert.strictEqual(res.body.created_by, "test3");
+          assert.approximately(new Date(res.body.created_on).getTime(), new Date().getTime(), date_tol);
+          assert.approximately(new Date(res.body.updated_on).getTime(), new Date().getTime(), date_tol);
+          assert.strictEqual(res.body.assigned_to, "test4");
+          assert.strictEqual(res.body.status_text, "test5");
+          done();
         });
     })
 
@@ -40,17 +38,15 @@ suite('Functional Tests', function() {
               issue_text: "test2",
               created_by: "test3"})
         .end((err, res) => {
+          assert.equal(res.status, 200);
           assert.strictEqual(res.body.issue_title, "test1");
-          assert.strictEqual(res.body.issue_text, "test2")
-          assert.strictEqual(res.body.created_by, "test3")
-          assert.approximately(new Date(res.body.created_on).getTime(), new Date().getTime(), date_tol)
-          assert.approximately(new Date(res.body.updated_on).getTime(), new Date().getTime(), date_tol)
-          assert.isEmpty(res.body.assigned_to, "Should be empty")
-          assert.isString(res.body.assigned_to, "Should be an empty string")
-          assert.isEmpty(res.body.status_text, "Should be empty")
-          assert.isString(res.body.status_text, "Should be an empty string")
-          assert.notEqual(res.status, 500);
-          done()
+          assert.strictEqual(res.body.issue_text, "test2");
+          assert.strictEqual(res.body.created_by, "test3");
+          assert.approximately(new Date(res.body.created_on).getTime(), new Date().getTime(), date_tol);
+          assert.approximately(new Date(res.body.updated_on).getTime(), new Date().getTime(), date_tol);
+          assert.isString(res.body.assigned_to, "Should be an empty string");
+          assert.isString(res.body.status_text, "Should be an empty string");
+          done();
         });
     })
 
@@ -61,9 +57,10 @@ suite('Functional Tests', function() {
         .send({issue_title: "test",
               issue_text: "test"})
         .end((err, res) => {
+          assert.equal(res.status, 200);
           assert.equal(res.body.error, 'required field(s) missing');
           assert.strictEqual(res.status, 500);
-          done()
+          done();
         });
     })
   });
@@ -75,11 +72,14 @@ suite('Functional Tests', function() {
         .request(server)
         .get('/api/issues/apitest')
         .end((err, res) => {
-          assert.isArray(res.body, "should return array")
-          assert.isAtLeast(res.body.length, 1, "Should not be empty array")
-          assert.hasAllKeys(res.body[0], ["assigned_to", "status_text", "_id", "open" , "issue_title", "issue_text", "created_by", "created_on", "updated_on"])
-          
-          done()
+          assert.equal(res.status, 200);
+          assert.isArray(res.body, "should return array");
+          assert.isAtLeast(res.body.length, 1, "Should not be empty array");
+          assert.hasAllKeys(res.body[0], 
+            ["assigned_to", "status_text", "_id", 
+            "open" , "issue_title", "issue_text", 
+            "created_by", "created_on", "updated_on"]);
+          done();
         });
     })
  
@@ -89,11 +89,14 @@ suite('Functional Tests', function() {
         .get('/api/issues/apitest')
         .query({open: false})
         .end((err, res) => {
-          assert.isArray(res.body, "should return array")
-          assert.isAtLeast(res.body.length, 1, "Should not be empty array")
-          assert.hasAllKeys(res.body[0], ["assigned_to", "status_text", "_id", "open" , "issue_title", "issue_text", "created_by", "created_on", "updated_on"])
-          
-          done()
+          assert.equal(res.status, 200);
+          assert.isArray(res.body, "should return array");
+          assert.isAtLeast(res.body.length, 1, "Should not be empty array");
+          assert.hasAllKeys(res.body[0], 
+            ["assigned_to", "status_text", "_id", 
+            "open" , "issue_title", "issue_text", 
+            "created_by", "created_on", "updated_on"]);
+          done();
         });
     })
    
@@ -103,11 +106,14 @@ suite('Functional Tests', function() {
         .get('/api/issues/apitest')
         .query( {issue_title: "First post", created_by: "ME"} )
         .end((err, res) => {
-          assert.isArray(res.body, "should return array")
-          assert.isAtLeast(res.body.length, 1, "Should not be empty array")
-          assert.hasAllKeys(res.body[0], ["assigned_to", "status_text", "_id", "open" , "issue_title", "issue_text", "created_by", "created_on", "updated_on"])
-  
-          done()
+          assert.equal(res.status, 200);
+          assert.isArray(res.body, "should return array");
+          assert.isAtLeast(res.body.length, 1, "Should not be empty array");
+          assert.hasAllKeys(res.body[0], 
+            ["assigned_to", "status_text", "_id", 
+            "open" , "issue_title", "issue_text", 
+            "created_by", "created_on", "updated_on"]);
+          done();
         });
     })
   });
@@ -120,10 +126,11 @@ suite('Functional Tests', function() {
         .send({ _id: globalId,
               issue_text: "something new"})
         .end((err, res) => {
-          assert.equal(res.body.result, 'successfully updated')
-          assert.equal(res.body._id, '6387e8062fef1b7516eb7593')
-          assert.notExists(res.body.error)
-          done()
+          assert.equal(res.status, 200);
+          assert.equal(res.body.result, 'successfully updated');
+          assert.equal(res.body._id, '6387e8062fef1b7516eb7593');
+          assert.notExists(res.body.error);
+          done();
         });
     })
 
@@ -134,15 +141,16 @@ suite('Functional Tests', function() {
         .send({ _id: globalId,
               assigned_to: "User",
               status_text: "New status",
-              open: "test",
+              open: false,
               issue_title: "New title",
               issue_text: "New text",
               created_by: "New user"})
         .end((err, res) => {
-          assert.equal(res.body.result, 'successfully updated')
-          assert.equal(res.body._id, '6387e8062fef1b7516eb7593')
-          assert.notExists(res.body.error)
-          done()
+          assert.equal(res.status, 200);
+          assert.equal(res.body.result, 'successfully updated');
+          assert.equal(res.body._id, '6387e8062fef1b7516eb7593');
+          assert.notExists(res.body.error);
+          done();
         });
     })
     
@@ -151,8 +159,9 @@ suite('Functional Tests', function() {
         .request(server)
         .put('/api/issues/apitest')
         .end((err, res) => {
-          assert.equal(res.body.error, 'missing _id')
-          done()
+          assert.equal(res.status, 200);
+          assert.equal(res.body.error, 'missing _id');
+          done();
         });
     })
     
@@ -162,10 +171,11 @@ suite('Functional Tests', function() {
         .put('/api/issues/apitest')
         .send({ _id: globalId })
         .end((err, res) => {
-          assert.notExists(res.body.result)
-          assert.equal(res.body.error, 'no update field(s) sent')
-          assert.equal(res.body._id, '6387e8062fef1b7516eb7593')
-          done()
+          assert.equal(res.status, 200);
+          assert.notExists(res.body.result);
+          assert.equal(res.body.error, 'no update field(s) sent');
+          assert.equal(res.body._id, '6387e8062fef1b7516eb7593');
+          done();
         });
     })
     
@@ -175,10 +185,11 @@ suite('Functional Tests', function() {
         .del('/api/issues/apitest')
         .send({ _id: 'globalId' })
         .end((err, res) => {
-          assert.equal(res.body.error, 'could not delete')
-          assert.equal(res.body._id, 'globalId' )
-          assert.notExists(res.body.result)
-          done()
+          assert.equal(res.status, 200);
+          assert.notExists(res.body.result);
+          assert.equal(res.body.error, 'could not delete');
+          assert.equal(res.body._id, 'globalId' );
+          done();
         });
     })
   });
@@ -190,10 +201,11 @@ suite('Functional Tests', function() {
         .del('/api/issues/apitest')
         .send({ _id: globalId })
         .end((err, res) => {
-          assert.equal(res.body.result, 'successfully deleted')
-          assert.equal(res.body._id, '6387e8062fef1b7516eb7593')
-          assert.notExists(res.body.error)
-          done()
+          assert.equal(res.status, 200);
+          assert.notExists(res.body.error);
+          assert.equal(res.body.result, 'successfully deleted');
+          assert.equal(res.body._id, '6387e8062fef1b7516eb7593');
+          done();
         });
     })
     test('Delete an issue with an invalid _id',function (done) {
@@ -202,10 +214,11 @@ suite('Functional Tests', function() {
         .del('/api/issues/apitest')
         .send({ _id: globalId })
         .end((err, res) => {
-          assert.equal(res.body.error, 'could not delete')
-          assert.equal(res.body._id, '6387e8062fef1b7516eb7593')
-          assert.notExists(res.body.result)
-          done()
+          assert.equal(res.status, 200);
+          assert.notExists(res.body.result);
+          assert.equal(res.body.error, 'could not delete');
+          assert.equal(res.body._id, '6387e8062fef1b7516eb7593');
+          done();
         });
     })
 
@@ -214,7 +227,9 @@ suite('Functional Tests', function() {
         .request(server)
         .del('/api/issues/apitest')
         .end((err, res) => {
-          assert.equal(res.body.error, 'missing _id')
+          assert.equal(res.status, 200);
+          assert.notExists(res.body.result);
+          assert.equal(res.body.error, 'missing _id');
           done()
         });
     })

@@ -35,7 +35,9 @@ const findProjectByName = (projectName, filter, done) => {
     { project_name: 0, __v: 0 },
     (err, projectFound) => {
       if (err)
-        console.log(
+      done(err, null);
+      
+        return console.log(
           "findOne error, projectName: ",
           projectName,
           "filter",
@@ -171,7 +173,6 @@ module.exports = function (app) {
           }
         );
       }
-      console.log("update finished: ", req.body._id);
     })
 
     //########  DELETE  ########
@@ -179,15 +180,19 @@ module.exports = function (app) {
       if (!req.body._id) {
         res.send({ error: "missing _id" });
       } else {
-        deleteOneIssue(req.params.project, req.body._id, (err, deleteInfo) => {
-          if (err) {
-            res.send({ error: "could not delete", _id: req.body._id });
-          } else if (res) {
-            res.send({ result: "successfully deleted", _id: req.body._id });
-          } else {
-            res.send({ error: "could not delete", _id: req.body._id });
+        deleteOneIssue(
+          req.params.project,
+          req.body._id,
+          (err, deletedIssue) => {
+            if (err) {
+              res.send({ error: "could not delete", _id: req.body._id });
+            } else if (deletedIssue) {
+              res.send({ result: "successfully deleted", _id: req.body._id });
+            } else {
+              res.send({ error: "could not delete", _id: req.body._id });
+            }
           }
-        });
+        );
       }
     });
 };
